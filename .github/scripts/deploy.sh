@@ -19,4 +19,5 @@ echo "> 기존 컨테이너 종료"
 sudo docker-compose -f docker-compose-nyang.yml down
 
 echo "> 새 컨테이너 빌드 및 실행"
-sudo docker-compose -f docker-compose-nyang.yml up -d --build
+sudo docker-compose -f docker-compose-nyang.yml build --pull
+sudo docker-compose -f docker-compose-nyang.yml up -d

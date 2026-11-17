@@ -1,5 +1,6 @@
 #사용할 베이스 이미지 명시 (공식 이미지 권장)
-FROM openjdk:17-jdk
+# shortcut: floating tag picks up new 17.x patches on rebuild (deploy.sh uses --pull); pin a full tag (17.0.<patch>_<build>-jre-noble) for reproducible builds
+FROM eclipse-temurin:17-jre
 
 #작업 디렉토리 생성 및 설정(컨테이너 내부 경로에 시작점으로 지정 -> 없으면 생성 됨)
 WORKDIR /app
