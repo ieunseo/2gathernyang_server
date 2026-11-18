@@ -10,7 +10,7 @@ import com.project.nyang.global.elasticsearch.animal.dto.AnimalEsDocument;
 import com.project.nyang.global.elasticsearch.animal.dto.AnimalEsListDTO;
 import com.project.nyang.global.exception.CustomException;
 import com.project.nyang.global.exception.ErrorCode;
-import com.project.nyang.global.searchlog.service.SearchLogEsService;
+import com.project.nyang.global.searchlog.stream.SearchLogPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -38,12 +38,12 @@ import java.util.concurrent.CompletableFuture;
 public class AnimalEsService {
     // Elastic search에 명령을 전달하는 서버 API
     private final ElasticsearchClient client;
-    private final SearchLogEsService searchLogEsService;
+    private final SearchLogPublisher searchLogPublisher;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 
     public Page<? extends AnimalEsListDTO> searchEsAnimals(String keyword, int page, int size) {
-        searchLogEsService.saveSearchLog(keyword);
+        searchLogPublisher.publish(keyword);
 
 
 
@@ -118,7 +118,7 @@ public class AnimalEsService {
 
     //통합 검색 (검색어 + 필터)
     public Page<AnimalEsListDTO> searchWithKeywordAndFilter(String keyword, LocalDate startDate, LocalDate endDate, String upKindNm, String kindNm, String regionName, String subRegionName, PageRequest pageable) {
-        searchLogEsService.saveSearchLog(keyword);
+        searchLogPublisher.publish(keyword);
 
         try {
             int from = pageable.getPageNumber() * pageable.getPageSize();

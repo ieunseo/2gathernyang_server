@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Mapping;
+import org.springframework.data.elasticsearch.annotations.Setting;
 
 /**
  * Elasticsearch에 저장되는 게시글 정보 모델
@@ -15,6 +17,10 @@ import org.springframework.data.elasticsearch.annotations.Document;
  * @since : 2025-07-15
  */
 @JsonIgnoreProperties(ignoreUnknown = true) // 해당 설정을 넣지 않으면 class 속성이 들어가게 됨
+// 프로젝트 종료 후 리팩터링: 부분 검색(.ngram) 분석기 설정이 ES 안에만 있어서 코드로 옮김
+// 인덱스가 없을 때 이 설정으로 만들어짐 (이미 있는 인덱스는 바뀌지 않음)
+@Setting(settingPath = "elasticsearch/board-settings.json")
+@Mapping(mappingPath = "elasticsearch/board-mappings.json")
 @Document(indexName = "board-index")
 @Getter
 @NoArgsConstructor

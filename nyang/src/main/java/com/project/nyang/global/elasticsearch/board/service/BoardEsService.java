@@ -6,7 +6,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
-import com.project.nyang.global.searchlog.service.SearchLogEsService;
+import com.project.nyang.global.searchlog.stream.SearchLogPublisher;
 import com.project.nyang.global.elasticsearch.board.dto.BoardEsDocument;
 import com.project.nyang.global.elasticsearch.board.dto.BoardListDTO;
 import com.project.nyang.global.elasticsearch.board.dto.LostBoardListDTO;
@@ -36,7 +36,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class BoardEsService {
     private final ElasticsearchClient client;
-    private final SearchLogEsService searchLogEsService;
+    private final SearchLogPublisher searchLogPublisher;
 
     public Page<BoardListDTO> searchBoard(Long categoryId, String keyword, int page, int size) {
         sendSearchLog(keyword);
@@ -85,7 +85,7 @@ public class BoardEsService {
     }
 
     private void sendSearchLog(String keyword) {
-        searchLogEsService.saveSearchLog(keyword);
+        searchLogPublisher.publish(keyword);
     }
 
     private Query buildBoardQuery(Long categoryId, String keyword) {
