@@ -42,8 +42,6 @@ dependencies {
 	//엘라스틱서치
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 	implementation 'co.elastic.clients:elasticsearch-java:8.12.2'
-	//kafka
-	implementation 'org.springframework.kafka:spring-kafka'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -58,8 +56,10 @@ dependencies {
 	// redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'  // Spring Cloud AWS v2.x
-	implementation 'com.amazonaws:aws-java-sdk-s3'  // AWS SDK for Java v1
+	// Supabase Storage (S3 호환 API)에 접속하기 위한 S3 클라이언트
+	implementation 'software.amazon.awssdk:s3:2.56.0'
+	// Spring Boot 3.2가 관리하는 httpclient5 버전이 낮아서 SDK 기본 HTTP 클라이언트 대신 JDK 기반 클라이언트 사용
+	implementation 'software.amazon.awssdk:url-connection-client:2.56.0'
 
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 

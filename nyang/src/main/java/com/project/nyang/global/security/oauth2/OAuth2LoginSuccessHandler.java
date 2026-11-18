@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
@@ -22,6 +23,10 @@ import java.util.Map;
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     //로그인 동작을 커스텀으로 구현하고 싶을 때 사용하는 인터페이스
+
+    // 로그인 성공 후 이동할 주소. 운영 기본값은 프론트, 로컬은 APP_LOGIN_REDIRECT_URL로 덮어쓴다
+    @Value("${app.login-redirect-url:http://2gaenyang.site/oauth2/redirect}")
+    private String loginRedirectUrl;
 
     //OAuth2 로그인 성공시 호출되는 메서드
     @Override
@@ -70,7 +75,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .build();
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
-        response.sendRedirect("http://2gaenyang.site/oauth2/redirect?token=" + accessToken);
+        response.sendRedirect(loginRedirectUrl + "?token=" + accessToken);
 
     }
 }

@@ -23,6 +23,7 @@ spring:
           batch_size: 100         # 배치 insert/update 시 유효
         order_inserts: true       # INSERT 순서 정렬
         order_updates: true       # UPDATE 순서 정렬
+        default_batch_fetch_size: 100  # LAZY 연관/컬렉션을 IN 쿼리로 묶어 조회 (N+1 완화)
 
 
   jackson:
@@ -31,15 +32,6 @@ spring:
 
   elasticsearch:
     uris: ${ELASTICSEARCH_URIS}
-
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
-    consumer:
-      group-id: search-log-group
-      auto-offset-reset: earliest
-    producer:
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
 
   security:
     oauth2:
@@ -110,17 +102,13 @@ spring:
           starttls.enable: true
           starttls.required: true
 
-cloud:
-  aws:
-    credentials:
-      access-key: ${AWS_ACCESS_KEY}
-      secret-key: ${AWS_SECRET_KEY}
-    region:
-      static: ${AWS_REGION}  # 버킷의 리전
-    s3:
-      bucket: ${AWS_BUCKET}     # 버킷 이름
-    stack:
-      auto: false
+# 이미지 저장소: Supabase Storage (S3 호환 API)
+storage:
+  endpoint: ${STORAGE_ENDPOINT}   # 예: https://<프로젝트ID>.storage.supabase.co/storage/v1/s3
+  region: ${STORAGE_REGION}
+  access-key: ${STORAGE_ACCESS_KEY}
+  secret-key: ${STORAGE_SECRET_KEY}
+  bucket: ${STORAGE_BUCKET}
 
 
 jwt:

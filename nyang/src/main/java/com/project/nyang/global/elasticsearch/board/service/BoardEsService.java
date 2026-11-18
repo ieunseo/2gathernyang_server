@@ -6,7 +6,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
-import com.project.nyang.global.searchlog.dto.SearchLogMessage;
+import com.project.nyang.global.searchlog.service.SearchLogEsService;
 import com.project.nyang.global.elasticsearch.board.dto.BoardEsDocument;
 import com.project.nyang.global.elasticsearch.board.dto.BoardListDTO;
 import com.project.nyang.global.elasticsearch.board.dto.LostBoardListDTO;
@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -37,7 +36,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class BoardEsService {
     private final ElasticsearchClient client;
-    private final KafkaTemplate<String, SearchLogMessage> kafkaTemplate;
+    private final SearchLogEsService searchLogEsService;
 
     public Page<BoardListDTO> searchBoard(Long categoryId, String keyword, int page, int size) {
         sendSearchLog(keyword);
@@ -86,14 +85,7 @@ public class BoardEsService {
     }
 
     private void sendSearchLog(String keyword) {
-        String searchedAt = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
-        SearchLogMessage message = new SearchLogMessage(keyword, searchedAt);
-        kafkaTemplate.send("search-log", message).thenAccept(result ->
-                log.info("Search log sent: {}", message)
-        ).exceptionally(ex -> {
-            log.warn("Failed to send search log: {}", ex.getMessage());
-            return null;
-        });
+        searchLogEsService.saveSearchLog(keyword);
     }
 
     private Query buildBoardQuery(Long categoryId, String keyword) {

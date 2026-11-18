@@ -30,20 +30,10 @@ public class ImageDeleteScheduler {
         List<Image> images = imageRepository.findByDeletedAtIsNotNullAndDeletedAtBefore(threshold);
 
         for (Image image : images) {
-            String fileName = extractFileNameFromUrl(image.getS3Url());
+            String fileName = S3Service.extractFileName(image.getS3Url());
             s3Service.deleteFile(fileName);
         }
 
         imageRepository.deleteAll(images); // DB에서 물리 삭제
-    }
-
-    //s3 이미지 경로에서 이미지 명 +확장자 추출
-    private String extractFileNameFromUrl(String s3Url) {
-        int index = s3Url.indexOf(".com/");
-        if (index != -1) {
-            return s3Url.substring(index + 5);
-        } else {
-            throw new IllegalArgumentException("Invalid S3 URL: " + s3Url);
-        }
     }
 }

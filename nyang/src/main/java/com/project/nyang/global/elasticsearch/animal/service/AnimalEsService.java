@@ -10,13 +10,12 @@ import com.project.nyang.global.elasticsearch.animal.dto.AnimalEsDocument;
 import com.project.nyang.global.elasticsearch.animal.dto.AnimalEsListDTO;
 import com.project.nyang.global.exception.CustomException;
 import com.project.nyang.global.exception.ErrorCode;
-import com.project.nyang.global.searchlog.dto.SearchLogMessage;
+import com.project.nyang.global.searchlog.service.SearchLogEsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -39,21 +38,12 @@ import java.util.concurrent.CompletableFuture;
 public class AnimalEsService {
     // Elastic search에 명령을 전달하는 서버 API
     private final ElasticsearchClient client;
-    private final KafkaTemplate<String, SearchLogMessage> kafkaTemplate;
+    private final SearchLogEsService searchLogEsService;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 
     public Page<? extends AnimalEsListDTO> searchEsAnimals(String keyword, int page, int size) {
-        String searchedAt = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
-        SearchLogMessage message = new SearchLogMessage(keyword, searchedAt);
-
-        CompletableFuture<?> future = kafkaTemplate.send("search-log", message);
-
-        future.thenAccept(result -> log.info("Search log sent: {}", message))
-                .exceptionally(ex -> {
-                    log.warn("Failed to send search log: {}", ex.getMessage());
-                    return null;
-                });
+        searchLogEsService.saveSearchLog(keyword);
 
 
 
@@ -128,16 +118,7 @@ public class AnimalEsService {
 
     //통합 검색 (검색어 + 필터)
     public Page<AnimalEsListDTO> searchWithKeywordAndFilter(String keyword, LocalDate startDate, LocalDate endDate, String upKindNm, String kindNm, String regionName, String subRegionName, PageRequest pageable) {
-        String searchedAt = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
-        SearchLogMessage message = new SearchLogMessage(keyword, searchedAt);
-
-        CompletableFuture<?> future = kafkaTemplate.send("search-log", message);
-
-        future.thenAccept(result -> log.info("Search log sent: {}", message))
-                .exceptionally(ex -> {
-                    log.warn("Failed to send search log: {}", ex.getMessage());
-                    return null;
-                });
+        searchLogEsService.saveSearchLog(keyword);
 
         try {
             int from = pageable.getPageNumber() * pageable.getPageSize();
