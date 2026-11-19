@@ -46,6 +46,8 @@ application*.yaml
 
 ### log ###
 logs/*
+# 앱 로그 (nyang/logs 포함, 요청 URL에 API 키가 찍힐 수 있음)
+**/logs/
 
 ### Pdf ###
 Pdf

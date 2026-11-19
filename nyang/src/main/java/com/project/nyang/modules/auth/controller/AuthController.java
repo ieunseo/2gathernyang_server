@@ -17,12 +17,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import com.project.nyang.global.security.cookie.CookieUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,6 +50,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final AuthRepository authRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final CookieUtil cookieUtil;
 
     /**
      * 토큰갱신 API
@@ -131,23 +131,8 @@ public class AuthController {
             case "kakao" -> oauth2WithdrawKakaoService.unlinkKakao(snsAccessToken);
             default -> throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
-        // 쿠키 삭제 응답
-        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(0)
-                .build();
-
-        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(0)
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+        // 쿠키 삭제 응답: 발급과 같은 속성이어야 함 (원래 secure(true)라 HTTP 환경에서 삭제가 거부됐음)
+        cookieUtil.deleteTokenCookies(response);
 
 
         return ResponseEntity.ok(ApiSuccessResponse.success(null, "회원 탈퇴가 완료되었습니다."));

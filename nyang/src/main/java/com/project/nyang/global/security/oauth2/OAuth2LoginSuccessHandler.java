@@ -6,9 +6,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import com.project.nyang.global.security.cookie.CookieUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -23,6 +23,8 @@ import java.util.Map;
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     //로그인 동작을 커스텀으로 구현하고 싶을 때 사용하는 인터페이스
+
+    private final CookieUtil cookieUtil;
 
     // 로그인 성공 후 이동할 주소. 운영 기본값은 프론트, 로컬은 APP_LOGIN_REDIRECT_URL로 덮어쓴다
     @Value("${app.login-redirect-url:http://2gaenyang.site/oauth2/redirect}")
@@ -55,25 +57,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
 
 
-        //토큰 전달방식
-        // 또는, 보안을 강화하려면 아래처럼 HttpOnly 쿠키로 전달해도 됨
-        // accessToken
-        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
-                .httpOnly(true)
-                .secure(false) // ✅ 로컬에서는 false
-                .sameSite("Lax") // ✅ Lax 또는 Strict로 변경
-                .path("/")
-                .build();
-        response.addHeader("Set-Cookie", accessTokenCookie.toString());
-
-// refreshToken
-        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
-                .httpOnly(true)
-                .secure(false) // ✅ 로컬에서는 false
-                .sameSite("Lax") // ✅
-                .path("/")
-                .build();
-        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+        //토큰 전달방식: HttpOnly 쿠키 (속성은 CookieUtil에서 설정 값으로 통일)
+        cookieUtil.addTokenCookies(response, accessToken, refreshToken);
 
         response.sendRedirect(loginRedirectUrl + "?token=" + accessToken);
 

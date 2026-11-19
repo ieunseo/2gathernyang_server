@@ -111,6 +111,14 @@ storage:
   bucket: ${STORAGE_BUCKET}
 
 
+# 프로젝트 종료 후 리팩터링: 환경마다 달라지는 쿠키, CORS 값을 설정으로 분리 (기본값은 기존 동작과 같음)
+app:
+  cookie:
+    secure: ${COOKIE_SECURE:false}        # 로컬, HTTP 배포: false / HTTPS 배포: true
+    same-site: ${COOKIE_SAME_SITE:Lax}    # 로컬, HTTP 배포: Lax / HTTPS + 프론트와 백엔드가 다른 사이트: None
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://15.164.4.171,http://localhost:8081}
+
 jwt:
   secretKey: ${JWT_SECRET_KEY}
   accessTokenExpirationTime: 900000          # 15분 (밀리초 기준)

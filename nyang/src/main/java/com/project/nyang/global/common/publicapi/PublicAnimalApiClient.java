@@ -40,7 +40,7 @@ public class PublicAnimalApiClient {
                 .queryParam("numOfRows", numOfRows)
                 .build()
                 .toUriString();
-        log.info("Request URL: {}", url);
+        log.info("Request URL: {}", masked(url));
 
         ResponseEntity<PublicApiResponse> response = restTemplate.getForEntity(url, PublicApiResponse.class);
         return response.getBody().getResponse().getBody().getItems().getItem();
@@ -57,11 +57,14 @@ public class PublicAnimalApiClient {
                 .queryParam("numOfRows", numOfRows)
                 .build()
                 .toUriString();
-        log.info("Request URL: {}", url);
+        log.info("Request URL: {}", masked(url));
 
         ResponseEntity<PublicApiResponse> response = restTemplate.getForEntity(url, PublicApiResponse.class);
         return response.getBody().getResponse().getBody().getItems().getItem();
     }
 
-
+    // 프로젝트 종료 후 리팩터링: 요청 주소의 serviceKey가 로그 파일에 그대로 남아 키가 노출돼서 가림
+    private String masked(String url) {
+        return url.replace(serviceKey, "***");
+    }
 }

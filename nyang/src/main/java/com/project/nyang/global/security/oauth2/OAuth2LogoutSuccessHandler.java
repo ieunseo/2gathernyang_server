@@ -5,7 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.ResponseCookie;
+import com.project.nyang.global.security.cookie.CookieUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -15,9 +16,13 @@ import java.io.IOException;
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class OAuth2LogoutSuccessHandler implements LogoutSuccessHandler {
 
     // 로그아웃을 커스텀으로 구현하고싶을때 사용하는 인터페이스
+
+    // 발급할 때와 같은 속성으로 삭제해야 브라우저가 받아들임
+    private final CookieUtil cookieUtil;
 
     // 카카오 REST API 키 (환경변수나 properties에서 가져오세요)
     private final String kakaoClientId = "${KAKAO_ID}";
@@ -69,22 +74,10 @@ public class OAuth2LogoutSuccessHandler implements LogoutSuccessHandler {
         }
         /* 냅다 쿠키삭제  = 소셜로그인은 쿠키삭제래요 */
 
-        deleteCookie(response, "accessToken");
-        deleteCookie(response, "refreshToken");
+        cookieUtil.deleteTokenCookies(response);
 
         // 최종적으로 redirectUrl로 리디렉트
         response.sendRedirect(redirectUrl);
-    }
-
-/* 쿠키 삭제 메서드 */
-    private void deleteCookie(HttpServletResponse response, String name) {
-        ResponseCookie cookie = ResponseCookie.from(name, "")
-                .path("/")
-                .maxAge(0)
-                .httpOnly(true) // 필요에 따라 false
-                .build();
-
-        response.addHeader("Set-Cookie", cookie.toString());
     }
 
 }
